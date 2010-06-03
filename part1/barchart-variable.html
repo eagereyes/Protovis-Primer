@@ -1,0 +1,28 @@
+<html>
+<head>
+	<title>Simple Bar Chart using Protovis</title>
+	<script src="http://protovis-js.googlecode.com/svn/trunk/protovis-r3.1.js" type="text/javascript"></script>
+</head>
+<body>
+
+<script type="text/javascript+protovis">
+
+var numbers = [1, 1.2, 1.7, 1.5, .7, .2, .5, .9];
+
+var panelWidth = 250;
+
+var barWidth = panelWidth/numbers.length;
+
+var barSpacing = 5;
+
+new pv.Panel().width(panelWidth).height(140)
+	.add(pv.Bar)
+		.data(numbers)
+		.bottom(0).width(barWidth-barSpacing)
+		.height(function(d) d * 80)
+		.left(function() this.index * barWidth)
+	.root.render();
+</script>
+
+</body>
+</html>
