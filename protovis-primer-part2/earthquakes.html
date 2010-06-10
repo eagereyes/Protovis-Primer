@@ -1,0 +1,58 @@
+<html>
+<head>
+	<title>Simple Bar Chart using Protovis</title>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script>
+	<script src="http://protovis-js.googlecode.com/svn/trunk/protovis-r3.1.js" type="text/javascript"></script>
+</head>
+<body>
+
+<script type="text/javascript+protovis">
+	var dataURL = "http://data.eagereyes.org/pv/earthquakes.json";
+//	var dataURL = "earthquakes.json";
+	
+	var JSONdata = $.ajax({ type: "GET", url: dataURL, async: false }).responseText;
+	var earthquakes = JSON.parse(JSONdata);
+	
+	var width = 560;
+	var height = 245;
+	
+	var barWidth = (width-10)/earthquakes.length;
+	var gap = 2;
+
+	var xScale = pv.Scale.linear(0, earthquakes.length).range(10, width);
+	var magnitude = pv.Scale.linear(0, 9).range(0, height);
+
+	var depthColors = pv.Scale.linear(0, 150).range("lightgray", "blue");
+
+	var eq = new pv.Panel().width(width).height(height+5);
+
+	eq.add(pv.Rule)
+		.data(magnitude.ticks())
+		.bottom(magnitude)
+		.strokeStyle("lightgray")
+		.left(10)
+		.width(width-10)
+	.anchor("left").add(pv.Label)
+		.visible(function(d) d > 0);
+
+	eq.add(pv.Bar)
+		.data(earthquakes)
+		.bottom(0)
+		.width(barWidth-gap)
+		.height(function(d) magnitude(d.Magnitude))
+		.left(function() xScale(this.index))
+		.fillStyle(function(d) depthColors(d.Depth))
+	.anchor("top").add(pv.Label)
+		.text(function(d) d.Magnitude)
+		.visible(function(d) d.Magnitude >= 4)
+		.textBaseline("bottom");
+
+	eq.render();
+</script>
+
+<p>
+For details, see <a href="http://eagereyes.org/tutorials/protovis-primer-part-2" target="_blank">A Protovis Primer, Part 2.</a>
+</p>
+
+</body>
+</html>
