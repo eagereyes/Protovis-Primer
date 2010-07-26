@@ -1,0 +1,173 @@
+<html>
+  <head>
+    <title>Presidential Demographics, Protovis Edition</title>
+    <script src="http://eagereyes.org/media/protovis-r3.2.js" type="text/javascript"></script>
+    <script src="presidents.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <script type="text/javascript+protovis">
+
+		// convertes a JavaScript Date object into a number representing the Julian Date
+		// ignores time, time zones, and all those irrelevant details
+		// http://en.wikipedia.org/wiki/Julian_day
+		var toJulian = function(d) {
+		    var a = Math.floor((14 - d.getMonth()) / 12);
+		    var y = d.getFullYear() + 4800 - a;
+		    var m = d.getMonth() + 1 + 12 * a - 3;
+		    return d.getDay() + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+		}
+
+		// converts Julian Date back to JS Date
+		// this works for values before the epoch, too!
+		var toJSDate = function(julianDate) {
+			return new Date((julianDate - 2440587) * 24 * 3600 * 1000); // 2440587 is January 1st, 1970.
+		}
+
+		var today = toJulian(new Date());
+
+		// chop off the lives and office terms of presidents who are still around (or in office)
+		// at today's date
+		presidents = presidents.map(function(d) {
+		    if (d.died > today)
+		    	d.died = today;
+		    if (d.term_ended > today)
+		    	d.term_ended = today;
+		    return d;
+		});
+
+		var h = 10;
+		var pad = 5;
+
+		var width = 1000;
+
+		// for embedding in the page:
+		// presidents = presidents.slice(32);
+		// width = 560;
+		
+		var height = (h + pad) * presidents.length + 16;
+
+		var dates = pv.Scale.linear(presidents[0].born, today).range(0, width - 10);
+		
+		var activePresident = 0;
+
+		var dateFormat = pv.Format.date("%b %e, %Y");
+
+		var vis = new pv.Panel()
+			.width(width).height(height)
+			.event("mousemove", pv.Behavior.point(Infinity).collapse("x"));
+
+		// tick marks at the bottom every 50 years from 1750 to 2000
+		vis.add(pv.Rule)
+			.data([[2360235, "1750"], [2378497, "1800"], [2396759, "1850"], [2415021, "1900"], [2433283, "1950"], [2451545, "2000"]])
+			.left(function(d) dates(d[0]))
+			.bottom(12)
+			.height(5)
+			.strokeStyle("#ccc")
+		.anchor("bottom").add(pv.Label)
+			.text(function(d) d[1]);
+
+		// the vertical rule marking the current president's birth
+		vis.add(pv.Rule)
+			.left(function() dates(presidents[activePresident].born))
+			.bottom(0)
+			.strokeStyle("#aaa")
+			.visible(function() activePresident >= 0);
+
+		// the vertical rule marking the current president's ascension
+		vis.add(pv.Rule)
+			.left(function() dates(presidents[activePresident].term_began))
+			.bottom(0)
+			.strokeStyle("#aaa")
+			.visible(function() activePresident >= 0);
+
+		// the vertical rule marking the end of the current president's office term
+		vis.add(pv.Rule)
+			.left(function() dates(presidents[activePresident].term_ended))
+			.bottom(0)
+			.strokeStyle("#aaa")
+			.visible(function() presidents[activePresident].term_ended < today);
+
+		// the vertical rule marking the current president's death
+		vis.add(pv.Rule)
+			.left(function() dates(presidents[activePresident].died))
+			.bottom(0)
+			.strokeStyle("#aaa")
+			.visible(function() presidents[activePresident].died < today);
+
+		// the light gray bar showing each president's life, with name label
+		vis.add(pv.Bar)
+			.data(presidents)
+			.left(function(d) dates(d.born))
+			.width(function(d) dates(d.died) - dates(d.born))
+			.height(3)
+			.bottom(function(d) height - ((h + pad) * this.index) - 12)
+			.fillStyle("#ddd")
+			.event("point", function() {activePresident = this.index; return vis;})
+//			.event("unpoint", function() {activePresident = -1; return vis;})
+		.anchor("left").add(pv.Label)
+			.textAlign("left")
+			.textBaseline("bottom")
+			.text(function(d) d.name)
+			.textStyle(function() (activePresident == this.index) ? "#333" : "#ddd");
+
+		// the little extension indicating a president who's still alive
+		vis.add(pv.Bar)
+			.data(presidents)
+			.visible(function(d) d.died == today)
+			.left(function(d) dates(d.died))
+			.bottom(function(d) height - this.index * (h + pad) - 11)
+			.height(1)
+			.width(10)
+			.fillStyle(function() (this.index == presidents.length-1) ? "#333": "#ddd");
+
+		// the light gray bar showing each president's office term
+		vis.add(pv.Bar)
+			.data(presidents)
+			.left(function(d) dates(d.term_began))
+			.width(function(d) dates(d.term_ended) - dates(d.term_began))
+			.height(3)
+			.bottom(function(d) height - ((h + pad) * this.index) - 12)
+			.fillStyle("#333");
+
+		// the labels in the lower left showing dates; not shown for embed version
+		if (width > 560) {
+
+			vis.add(pv.Label)
+				.text(function() presidents[activePresident].name)
+				.left(0)
+				.bottom(52)
+				.font("bold 12pt sans-serif");
+
+			vis.add(pv.Label)
+				.text(function(d) {
+					var s = "Life: "+dateFormat.format(toJSDate(presidents[activePresident].born))+" - ";
+					if (presidents[activePresident].died < today)
+						s += dateFormat.format(toJSDate(presidents[activePresident].died));
+					return s;
+				})
+				.left(0)
+				.bottom(40);
+
+			vis.add(pv.Label)
+				.text(function(d) {
+					var s = "Office: "+dateFormat.format(toJSDate(presidents[activePresident].term_began))+" - ";
+					if (presidents[activePresident].term_ended < today)
+						s += dateFormat.format(toJSDate(presidents[activePresident].term_ended));
+					return s;
+				})
+				.left(0)
+				.bottom(30);
+
+			vis.add(pv.Label)
+				.text(function(d) "Ascension Age: "+Math.floor((presidents[activePresident].term_began-presidents[activePresident].born)/365.25))
+				.left(0)
+				.bottom(20);
+				
+		}
+		
+		// done
+		vis.render();
+
+    </script>
+  </body>
+</html>
