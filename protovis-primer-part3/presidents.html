@@ -35,8 +35,8 @@
 		    return d;
 		});
 
-		var h = 10;
-		var pad = 5;
+		var h = 3;
+		var pad = 12;
 
 		var width = 1000;
 
@@ -60,7 +60,7 @@
 		vis.add(pv.Rule)
 			.data([[2360235, "1750"], [2378497, "1800"], [2396759, "1850"], [2415021, "1900"], [2433283, "1950"], [2451545, "2000"]])
 			.left(function(d) dates(d[0]))
-			.bottom(12)
+			.bottom(10)
 			.height(5)
 			.strokeStyle("#ccc")
 		.anchor("bottom").add(pv.Label)
@@ -99,11 +99,10 @@
 			.data(presidents)
 			.left(function(d) dates(d.born))
 			.width(function(d) dates(d.died) - dates(d.born))
-			.height(3)
-			.bottom(function(d) height - ((h + pad) * this.index) - 12)
+			.height(h)
+			.top(function() ((h + pad) * this.index) + pad)
 			.fillStyle("#ddd")
 			.event("point", function() {activePresident = this.index; return vis;})
-//			.event("unpoint", function() {activePresident = -1; return vis;})
 		.anchor("left").add(pv.Label)
 			.textAlign("left")
 			.textBaseline("bottom")
@@ -115,18 +114,18 @@
 			.data(presidents)
 			.visible(function(d) d.died == today)
 			.left(function(d) dates(d.died))
-			.bottom(function(d) height - this.index * (h + pad) - 11)
+			.top(function() ((h + pad) * this.index) + pad + 1)
 			.height(1)
 			.width(10)
 			.fillStyle(function() (this.index == presidents.length-1) ? "#333": "#ddd");
 
-		// the light gray bar showing each president's office term
+		// the dark gray bar showing each president's office term
 		vis.add(pv.Bar)
 			.data(presidents)
 			.left(function(d) dates(d.term_began))
 			.width(function(d) dates(d.term_ended) - dates(d.term_began))
 			.height(3)
-			.bottom(function(d) height - ((h + pad) * this.index) - 12)
+			.top(function() ((h + pad) * this.index) + pad)
 			.fillStyle("#333");
 
 		// the labels in the lower left showing dates; not shown for embed version
