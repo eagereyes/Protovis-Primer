@@ -70,15 +70,13 @@
 		vis.add(pv.Rule)
 			.left(function() dates(presidents[activePresident].born))
 			.bottom(0)
-			.strokeStyle("#aaa")
-			.visible(function() activePresident >= 0);
+			.strokeStyle("#aaa");
 
 		// the vertical rule marking the current president's ascension
 		vis.add(pv.Rule)
 			.left(function() dates(presidents[activePresident].term_began))
 			.bottom(0)
-			.strokeStyle("#aaa")
-			.visible(function() activePresident >= 0);
+			.strokeStyle("#aaa");
 
 		// the vertical rule marking the end of the current president's office term
 		vis.add(pv.Rule)
