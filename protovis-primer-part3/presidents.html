@@ -28,9 +28,9 @@
 		// chop off the lives and office terms of presidents who are still around (or in office)
 		// at today's date
 		presidents = presidents.map(function(d) {
-		    if (d.died > today)
+		    if (d.died < 0)
 		    	d.died = today;
-		    if (d.term_ended > today)
+		    if (d.term_ended < 0)
 		    	d.term_ended = today;
 		    return d;
 		});
