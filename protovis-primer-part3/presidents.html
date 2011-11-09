@@ -43,11 +43,11 @@
 		// for embedding in the page:
 		// presidents = presidents.slice(32);
 		// width = 560;
-		
+
 		var height = (h + pad) * presidents.length + 16;
 
 		var dates = pv.Scale.linear(presidents[0].born, today).range(0, width - 10);
-		
+
 		var activePresident = 0;
 
 		var dateFormat = pv.Format.date("%b %e, %Y");
@@ -159,9 +159,9 @@
 				.text(function(d) "Ascension Age: "+Math.floor((presidents[activePresident].term_began-presidents[activePresident].born)/365.25))
 				.left(0)
 				.bottom(20);
-				
+
 		}
-		
+
 		// done
 		vis.render();
 

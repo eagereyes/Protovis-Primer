@@ -9,13 +9,13 @@
 <script type="text/javascript+protovis">
 	var dataURL = "http://data.eagereyes.org/pv/earthquakes.json";
 //	var dataURL = "earthquakes.json";
-	
+
 	var JSONdata = $.ajax({ type: "GET", url: dataURL, async: false }).responseText;
 	var earthquakes = JSON.parse(JSONdata);
-	
+
 	var width = 560;
 	var height = 245;
-	
+
 	var barWidth = (width-10)/earthquakes.length;
 	var gap = 2;
 
